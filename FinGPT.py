@@ -4,7 +4,6 @@ import numpy as np
 import datetime
 import os
 
-# Optional Imports with Graceful Degradation
 try:
     import streamlit as st
 except ImportError:
@@ -22,33 +21,48 @@ if st:
     st.title("FinGPT Agent: Real-Time Stock Advisor")
 
     ticker = st.sidebar.selectbox("Choose Stock Ticker:", ["AAPL", "TSLA", "AMZN", "NVDA"])
-    days = st.sidebar.slider("Number of past days:", min_value=30, max_value=365, value=90)
+    days = st.sidebar.slider("Number of past days:", min_value=30, max_value=365, value=150)
 else:
     print("Streamlit is not available. Please install it using 'pip install streamlit' to run the interactive dashboard.")
-    ticker = "AAPL"
+    ticker = ("AAPL", "TSLA", "AMZN", "NVDA")
     days = min(days, 90)
 
 # === 3. FETCH STOCK DATA ===
-end = datetime.datetime.today()
-start = end - datetime.timedelta(days=days)
 
-data_path = f"data/{ticker}.xlsx"
-if os.path.exists(data_path):
-    data = pd.read_excel(data_path, parse_dates=["Date"])
-    data = data.set_index("Date")
-    data = data.sort_index()
-    data = data[(data.index >= start) & (data.index <= end)]
+ticker_file_map = {
+    "AAPL": "AAPL.xlsx",
+    "TSLA": "TSLA.xlsx",
+    "AMZN": "AMZN.xlsx",
+    "NVDA": "NVDA.xlsx"
+}
 
+data_path = ticker_file_map.get(ticker)
+
+try:
+    data = pd.read_excel(data_path, index_col=0, parse_dates=True)
+    data.columns = data.columns.str.strip()
+except Exception as e:
     if st:
-        st.code(data.head().to_string())
-        st.write("Raw Columns:", data.columns)
-else:
-    if st:
-        st.warning(f"No local Excel file found for {ticker}.xlsx in /data.")
+        st.error(f"Error loading data file: {e}")
         st.stop()
     else:
-        print(f"Missing file: data/{ticker}.xlsx")
+        print(f"Error loading data file: {e}")
         exit()
+
+if data.empty:
+    if st:
+        st.warning("No data found. Try a different ticker.")
+        st.stop()
+    else:
+        print("No stock data available. Exiting.")
+        exit()
+
+if st:
+    st.subheader(f"Stock Price for {ticker}")
+    st.line_chart(data['Close'])
+    st.code(data.head().to_string())
+else:
+    print(data['Close'].tail())
 
 # === 4. SIMPLE FORECAST ===
 
@@ -64,7 +78,7 @@ try:
     from openai import OpenAI
     client = OpenAI(
         base_url="https://openrouter.ai/api/v1",
-        api_key= "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",
+        api_key=st.secrets["OPENAI_APIKEY"]
     )
 
     def fetch_news_summary(ticker):
@@ -80,6 +94,7 @@ try:
         return response.choices[0].message.content
 
     sentiment_summary = fetch_news_summary(ticker)
+
     if st:
         st.subheader("News Sentiment Summary")
         st.info(sentiment_summary)
