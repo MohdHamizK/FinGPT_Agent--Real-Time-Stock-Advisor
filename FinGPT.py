@@ -21,37 +21,34 @@ if st:
     st.set_page_config(page_title="FinGPT Agent", layout="wide")
     st.title("FinGPT Agent: Real-Time Stock Advisor")
 
-    ticker = st.sidebar.selectbox("Choose Stock Ticker:", ["AAPL", "TSLA", "GOOGL", "AMZN", "MSFT", "META", "NVDA", "INTC"])
-    days = st.sidebar.slider("Number of past days:", min_value=30, max_value=365, value=180)
+    ticker = st.sidebar.selectbox("Choose Stock Ticker:", ["AAPL", "TSLA", "AMZN", "NVDA"])
+    days = st.sidebar.slider("Number of past days:", min_value=30, max_value=365, value=90)
 else:
     print("Streamlit is not available. Please install it using 'pip install streamlit' to run the interactive dashboard.")
     ticker = "AAPL"
-    days = 90
+    days = min(days, 90)
 
 # === 3. FETCH STOCK DATA ===
-
 end = datetime.datetime.today()
 start = end - datetime.timedelta(days=days)
 
-if yf:
-    data = yf.download(ticker, start=start, end=end)
-else:
-    print("The 'yfinance' module is not installed. Please install it using 'pip install yfinance'.")
-    data = pd.DataFrame()
+data_path = f"data/{ticker}.xlsx"
+if os.path.exists(data_path):
+    data = pd.read_excel(data_path, parse_dates=["Date"])
+    data = data.set_index("Date")
+    data = data.sort_index()
+    data = data[(data.index >= start) & (data.index <= end)]
 
-if data.empty:
     if st:
-        st.warning("No data found. Try a different ticker.")
+        st.code(data.head().to_string())
+        st.write("Raw Columns:", data.columns)
+else:
+    if st:
+        st.warning(f"No local Excel file found for {ticker}.xlsx in /data.")
         st.stop()
     else:
-        print("No stock data available. Exiting.")
+        print(f"Missing file: data/{ticker}.xlsx")
         exit()
-
-if st:
-    st.subheader(f"Stock Price for {ticker}")
-    st.line_chart(data['Close'])
-else:
-    print(data['Close'].tail())
 
 # === 4. SIMPLE FORECAST ===
 
