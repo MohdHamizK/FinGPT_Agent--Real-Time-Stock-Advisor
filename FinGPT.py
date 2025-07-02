@@ -1,17 +1,14 @@
-# FinGPT Agent: Real-Time Stock Advisor
-
 # === 1. IMPORT LIBRARIES ===
 import pandas as pd
 import numpy as np
 import datetime
 import os
-from dotenv import load_dotenv
 
 # Optional Imports with Graceful Degradation
 try:
     import streamlit as st
 except ImportError:
-    st = None  # fallback to None for environments without streamlit
+    st = None 
 
 try:
     import yfinance as yf
@@ -19,11 +16,11 @@ except ImportError:
     yf = None
 
 # === 2. STREAMLIT INTERFACE SETUP ===
+
 if st:
     st.set_page_config(page_title="FinGPT Agent", layout="wide")
     st.title("FinGPT Agent: Real-Time Stock Advisor")
 
-    # Sidebar Inputs
     ticker = st.sidebar.selectbox("Choose Stock Ticker:", ["AAPL", "TSLA", "GOOGL", "AMZN", "MSFT", "META", "NVDA", "INTC"])
     days = st.sidebar.slider("Number of past days:", min_value=30, max_value=365, value=180)
 else:
@@ -32,6 +29,7 @@ else:
     days = 90
 
 # === 3. FETCH STOCK DATA ===
+
 end = datetime.datetime.today()
 start = end - datetime.timedelta(days=days)
 
@@ -63,12 +61,13 @@ latest_price = data['Close'].iloc[-1]
 recent_trend = data['Signal'].iloc[-5:].sum()
 recent_performance = data['Return'].iloc[-5:].mean()
 
-# === 5. GPT-BASED NEWS SENTIMENT VIA OPENROUTER ===
+# === 5. GPT-BASED NEWS SENTIMENT VIA OPENAI ===
+
 try:
     from openai import OpenAI
     client = OpenAI(
         base_url="https://openrouter.ai/api/v1",
-        api_key= "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",
+        api_key= "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",
     )
 
     def fetch_news_summary(ticker):
