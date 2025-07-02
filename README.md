@@ -1,7 +1,7 @@
 <div align="center">
   <br />
     <a href="https://www.linkedin.com/in/mohammedhamizk" target="_blank">
-      <img src="https://github.com/MohdHamizK/FinGPT/blob/main/ReadMET.png" alt="Project Banner">
+      <img src="https://github.com/MohdHamizK/FinGPT_Agent--Real-Time-Stock-Advisor/blob/main/FinGPT%20Agent.png" alt="Project Banner">
     </a>
   <br />
   <h3 align="center">FinGPT Agent: Real-Time Stock Advisor.</h3>
@@ -56,4 +56,3 @@ Follow me on Kaggle : [![](https://img.shields.io/badge/Kaggle-20BEFF?style=for-
 Follow me on Instagram : [![](https://img.shields.io/badge/Instagram-E4405F?style=for-the-badge&logo=instagram&logoColor=white)](https://instagram.com/_mohd_hamiz_k/)
 
 Follow me on Github : [![](https://img.shields.io/badge/GitHub-100000?style=for-the-badge&logo=github&logoColor=white)](https://github.com/MohdHamizK/)
-
